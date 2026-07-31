@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<title>Ahrefs и 110 000 units — что случилось и что мы исправили</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --line: #e1e0d9;
+    --border: rgba(11,11,11,.10);
+    --good: #0ca30c;
+    --good-text: #006300;
+    --warn: #fab219;
+    --crit: #d03b3b;
+    --accent: #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface: #1a1a19;
+      --ink: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --line: #2c2c2a;
+      --border: rgba(255,255,255,.10);
+      --good: #0ca30c;
+      --good-text: #0ca30c;
+      --accent: #3987e5;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    font-size: 16.5px;
+    padding: 0 20px 80px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  /* ── hero ── */
+  header { padding: 64px 0 8px; }
+  .kicker {
+    font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(26px, 4.5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin-bottom: 16px; }
+  .lede { font-size: 18.5px; color: var(--ink-2); max-width: 640px; }
+
+  /* ── stat tiles ── */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 36px 0 8px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat .v { font-size: 30px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+  .stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* ── sections ── */
+  section { margin-top: 56px; }
+  h2 { font-size: 24px; letter-spacing: -.01em; margin-bottom: 16px; }
+  h2 .n {
+    display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 9px;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 800;
+    margin-right: 10px; vertical-align: -4px;
+  }
+  p { margin-bottom: 14px; color: var(--ink-2); }
+  p b, li b { color: var(--ink); }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 24px; margin: 18px 0;
+  }
+
+  /* term explainer */
+  .term {
+    border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; margin: 18px 0;
+    font-size: 15px; color: var(--ink-2);
+  }
+  .term b { color: var(--ink); }
+
+  /* ── timeline ── */
+  .tl { list-style: none; margin: 20px 0; }
+  .tl li { position: relative; padding: 0 0 22px 30px; }
+  .tl li::before {
+    content: ""; position: absolute; left: 6px; top: 8px; width: 9px; height: 9px;
+    border-radius: 50%; background: var(--accent);
+  }
+  .tl li::after {
+    content: ""; position: absolute; left: 10px; top: 22px; bottom: -2px; width: 1.5px;
+    background: var(--line);
+  }
+  .tl li:last-child::after { display: none; }
+  .tl .t { font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tl .d { color: var(--ink-2); }
+  .tl .d b { color: var(--ink); }
+
+  /* ── the math strip ── */
+  .math {
+    display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin: 22px 0;
+  }
+  .math .box {
+    flex: 1 1 130px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; text-align: center;
+  }
+  .math .op { align-self: center; font-size: 22px; font-weight: 800; color: var(--muted); }
+  .math .bv { font-size: 22px; font-weight: 800; }
+  .math .bl { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+  .math .box.res { border-color: var(--crit); }
+  .math .box.res .bv { color: var(--crit); }
+
+  /* ── meter (portal widget replica) ── */
+  .meter-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; margin-bottom: 8px; }
+  .meter-head b { font-variant-numeric: tabular-nums; }
+  .meter-wrap { position: relative; }
+  .meter { height: 22px; background: var(--page); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 28%; border-radius: 7px 0 0 7px;
+    background: linear-gradient(90deg, var(--good), #43b97e); }
+  .meter-mark {
+    position: absolute; top: -4px; bottom: -4px; left: 66.7%; width: 6px; margin-left: -3px;
+    border-radius: 3px; background: var(--good); box-shadow: 0 0 0 1.5px var(--surface);
+  }
+  .meter-mark::before {
+    content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--good);
+  }
+  .meter-foot { font-size: 13px; color: var(--muted); margin-top: 9px; }
+  .meter-foot b { color: var(--good-text); }
+
+  /* ── fix cards ── */
+  .fixes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 20px; }
+  .fix { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
+  .fix .ico { font-size: 22px; margin-bottom: 10px; }
+  .fix h3 { font-size: 16px; margin-bottom: 8px; }
+  .fix p { font-size: 14.5px; margin: 0; }
+
+  /* ── cheat-sheet table ── */
+  table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 15px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  td:first-child { width: 52%; }
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: .04em;
+    padding: 2px 9px; border-radius: 999px; margin-bottom: 6px; }
+  .tag.ok { color: var(--good-text); background: rgba(12,163,12,.12); }
+  .tag.no { color: var(--crit); background: rgba(208,59,59,.10); }
+  td .why { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .math .op { width: 100%; text-align: center; }
+    td:first-child { width: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">ON Digital Agency · Ahrefs × агент Лео · 31 июля — 1 августа 2026</div>
+    <h1>Как одно «небольшое» ядро съело 110 000 API units — и что мы с этим сделали</h1>
+    <p class="lede">Разбор для команды: почему попытка собрать семантическое ядро через
+    Ahrefs API сожгла четверть месячного лимита за один заход, как устроен биллинг
+    Ahrefs и какие предохранители мы поставили, чтобы это не повторилось.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="v">≈110 000</div><div class="l">units потрачено на одно ядро</div></div>
+      <div class="stat"><div class="v">28%</div><div class="l">месячного лимита — за один заход</div></div>
+      <div class="stat"><div class="v">400 000</div><div class="l">units в месяц на тарифе Standard</div></div>
+      <div class="stat"><div class="v">11 авг</div><div class="l">счётчик обнулится</div></div>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="n">1</span>Что случилось</h2>
+
+    <div class="term"><b>API units</b> — внутренняя «валюта» Ahrefs для доступа к данным
+    через API (то есть когда данные забирает программа или AI-агент, а не человек в
+    браузере). На нашем тарифе их 400 000 в месяц на весь аккаунт — общий котёл для
+    всех, кто пользуется.</div>
+
+    <ul class="tl">
+      <li><div class="t">31 июля, день</div><div class="d">Подключили нашего SEO-агента
+        <b>Лео</b> к Ahrefs через официальный MCP — теперь он может сам смотреть
+        ключевики, бэклинки и позиции.</div></li>
+      <li><div class="t">31 июля, день</div><div class="d">Первая боевая задача — собрать
+        <b>семантическое ядро по теме UFE</b> (эмболизация миомы матки): список всех
+        поисковых запросов, по которым люди ищут эту услугу.</div></li>
+      <li><div class="t">31 июля, вечер</div><div class="d">Андрей замечает: <b>«Лимитов
+        много улетело с Ahrefs»</b> — счётчик показывает ~110 тысяч потраченных units.
+        Ядро при этом получилось небольшое.</div></li>
+      <li><div class="t">31 июля — 1 августа</div><div class="d">Разобрались в биллинге
+        Ahrefs, поставили предохранители — о них ниже.</div></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span>Почему так дорого: арифметика Ahrefs</h2>
+
+    <p>Интуиция говорит: «одна задача — один запрос — копейки». Биллинг Ahrefs считает
+    иначе: units списываются <b>за каждую строку ответа, умноженную на каждое запрошенное
+    поле</b>. Дешёвые поля (само слово, частотность) стоят 1 unit за строку, дорогие
+    (оценки трафика и производные метрики) — 5–10. Любой запрос стоит минимум 50 units,
+    даже пустой.</p>
+
+    <p>Это как мобильный роуминг: дома у тебя безлимит, и ты привык не думать о
+    мегабайтах — а за границей каждый мегабайт по прайсу, и вечер с видеозвонками
+    внезапно стоит как ужин в ресторане.</p>
+
+    <p>Теперь само ядро. Эндпоинт «Matching terms» (подбор всех запросов по теме) по
+    умолчанию отдаёт <b>до 1000 строк за вызов</b>. Для ядра нужны все колонки: объём,
+    сложность, цена клика, потенциал трафика, интент… Считаем:</p>
+
+    <div class="math">
+      <div class="box"><div class="bv">1000</div><div class="bl">строк за вызов<br>(лимит по умолчанию)</div></div>
+      <div class="op">×</div>
+      <div class="box"><div class="bv">~15</div><div class="bl">units за строку<br>(набор полей для ядра)</div></div>
+      <div class="op">×</div>
+      <div class="box"><div class="bv">~7</div><div class="bl">вызовов: разные сиды,<br>сортировки, уточнения</div></div>
+      <div class="op">=</div>
+      <div class="box res"><div class="bv">~105 000</div><div class="bl">units за «небольшую»<br>задачу</div></div>
+    </div>
+
+    <p>Агент усугубляет эффект: человек сделал бы один экспорт, а агент <b>итерирует</b> —
+    пробует синонимы, разные фильтры, пересортировки. Каждая итерация — новый платный
+    вызов, и для агента они «бесплатны на ощупь»: боли от расхода он не чувствует.</p>
+
+    <div class="card">
+      <p style="margin-bottom:6px"><b>Ключевой факт:</b> веб-интерфейс Ahrefs устроен
+      по-другому. Экспорт из браузера тратит отдельную квоту «export rows», а не API
+      units. Одно и то же ядро руками из интерфейса — <b>0 units</b>, через API —
+      ~110 тысяч.</p>
+      <p style="margin:0">Поэтому договорённость такая: массовые выгрузки — руками из
+      интерфейса, а API/агент — для точечных вопросов, где он реально удобнее.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">3</span>Что мы исправили</h2>
+
+    <div class="fixes">
+      <div class="fix"><div class="ico">🛑</div>
+        <h3>Лео больше не собирает ядра через API</h3>
+        <p>В его правила зашито: полное ядро — только выгрузкой из веб-интерфейса, и он
+        сам подскажет, что нажать (Keywords Explorer → сиды → Matching terms → Export).
+        Через API — только точечное: интент, объёмы по списку слов, проверка выдачи.</p>
+      </div>
+      <div class="fix"><div class="ico">💸</div>
+        <h3>Жёсткая экономия в каждом запросе</h3>
+        <p>Лео всегда задаёт лимит строк явно (50–100, максимум 250 — дефолтную тысячу
+        не оставляет никогда) и запрашивает только нужные поля. Не уверен в цене —
+        сначала пробный вызов на 10 строк.</p>
+      </div>
+      <div class="fix"><div class="ico">🧾</div>
+        <h3>Цена вслух после каждого вызова</h3>
+        <p>Каждый ответ Ahrefs содержит точную стоимость запроса. Лео теперь называет
+        её: «этот запрос стоил 800 units». У команды появится интуиция, что дорого,
+        а что копейки.</p>
+      </div>
+      <div class="fix"><div class="ico">📊</div>
+        <h3>Виджет расхода на портале</h3>
+        <p>На странице Лео на портале — живой счётчик units с чёрточкой темпа: видно,
+        сколько потрачено, укладываемся ли в месяц и сколько дней до сброса. Обновляется
+        каждые 10 минут.</p>
+      </div>
+      <div class="fix"><div class="ico">📓</div>
+        <h3>Каждый запрос — в журнале</h3>
+        <p>Журнал активности Лео теперь пишет и Ahrefs-запросы: какой инструмент, с
+        какими ключевиками, кто попросил. Если units опять утекут — будет видно, куда
+        именно.</p>
+      </div>
+      <div class="fix"><div class="ico">🤝</div>
+        <h3>Общая договорённость</h3>
+        <p>Ядра и массовые выгрузки — руками из интерфейса Ahrefs. Агент — для быстрых
+        вопросов из Slack, когда лень открывать Ahrefs ради одной цифры.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">4</span>Где мы сейчас</h2>
+
+    <p>Так выглядит счётчик на портале прямо сейчас: потрачено 28% котла, а времени в
+    цикле прошло уже две трети — чёрточка показывает, где был бы расход при ровном
+    темпе. Мы заметно <b>ниже</b> её, так что запаса до 11 августа хватает с избытком —
+    даже с учётом сгоревших 110 тысяч.</p>
+
+    <div class="card">
+      <div class="meter-head"><span>API units в этом цикле</span><b>110 261 / 400 000 · 28%</b></div>
+      <div class="meter-wrap">
+        <div class="meter"><i></i></div>
+        <span class="meter-mark" title="Линия ровного темпа: 67%"></span>
+      </div>
+      <div class="meter-foot">Standard, годовая оплата · сброс 11 августа · <b>✓ идём ниже
+      ровного темпа</b> — чёрточка на 67%, потрачено 28%</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">5</span>Шпаргалка: что просить у Лео, а что делать руками</h2>
+
+    <table>
+      <thead><tr><th>Задача</th><th>Как правильно</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag ok">Лео, спокойно</span><br>Интент запроса, объём по списку
+            слов, топ выдачи по запросу, точечная проверка конкурента
+            <div class="why">250 строк × пара полей ≈ 300–800 units — копейки</div></td>
+          <td>Просто спросить Лео в Slack. Он назовёт стоимость после ответа.</td>
+        </tr>
+        <tr>
+          <td><span class="tag ok">Лео, спокойно</span><br>«Сколько units осталось?»
+            <div class="why">Проверка лимитов бесплатная — 0 units</div></td>
+          <td>Спросить Лео или глянуть виджет на портале.</td>
+        </tr>
+        <tr>
+          <td><span class="tag no">Не через API</span><br>Полное семантическое ядро,
+            выгрузка всех ключевиков темы, массовый экспорт бэклинков
+            <div class="why">Десятки тысяч units за заход</div></td>
+          <td>Руками из веб-интерфейса Ahrefs: Keywords Explorer → сиды → Matching terms →
+            Export. Тратится квота экспорта, не API units. Лео поможет с дальнейшей
+            обработкой файла — это уже бесплатно.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    Подготовлено Claude Code для ON Digital Agency · 1 августа 2026 ·
+    цифры — из счётчика Ahrefs на момент публикации; правила зашиты в SOUL Лео,
+    виджет и журнал — на портале, страница Лео.
+  </footer>
+
+</div>
+</body>
+</html>
